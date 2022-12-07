@@ -15,34 +15,34 @@ class ClientManager(BaseUserManager):
         self,
         email: str,
         password: str
-    ) -> 'CustomUser':
+    ) -> 'Client':
 
         if not email:
             raise ValidationError('Email required')
 
-        user: 'CustomUser' = self.model(
+        client: 'Client' = self.model(
             email=self.normalize_email(email),
             password=password
         )
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+        client.set_password(password)
+        client.save(using=self._db)
+        return client
 
     def create_superuser(
         self,
         email: str,
         password: str
-    ) -> 'CustomUser':
+    ) -> 'Client':
 
-        user: 'CustomUser' = self.model(
+        client: 'Client' = self.model(
             email=self.normalize_email(email),
             password=password
         )
-        user.is_staff = True
-        user.is_superuser = True
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+        client.is_staff = True
+        client.is_superuser = True
+        client.set_password(password)
+        client.save(using=self._db)
+        return client
 
 
 class Client(AbstractBaseUser, PermissionsMixin):
