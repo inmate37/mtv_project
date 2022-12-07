@@ -1,0 +1,9 @@
+.isort.cfg
+.pyc
+*.log
+*.sqlite3
+*.sqlite3-journal
+.env
+__pycache__/
+staticfiles/
+media/
