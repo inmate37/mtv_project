@@ -1,4 +1,3 @@
-.isort.cfg
 .pyc
 *.log
 *.sqlite3

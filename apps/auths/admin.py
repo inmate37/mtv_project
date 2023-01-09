@@ -1,5 +1,8 @@
 # Python
-from typing import Optional
+from typing import (
+    Any,
+    Optional
+)
 
 # Django
 from django.contrib import admin
@@ -89,6 +92,23 @@ class ClientAdmin(UserAdmin):
         return self.readonly_fields + (
             'email',
         )
+
+    def has_add_permission(self, request: WSGIRequest) -> bool:
+        return True
+
+    def has_change_permission(
+        self,
+        request: WSGIRequest,
+        obj: Any = None
+    ) -> bool:
+        return True
+
+    def has_delete_permission(
+        self,
+        request: WSGIRequest,
+        obj: Any = None
+    ) -> bool:
+        return True
 
 
 admin.site.register(Client, ClientAdmin)

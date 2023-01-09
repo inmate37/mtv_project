@@ -10,6 +10,7 @@ from django.utils import timezone
 
 
 class ClientManager(BaseUserManager):
+    """ClientManager."""
 
     def create_user(
         self,
@@ -46,25 +47,32 @@ class ClientManager(BaseUserManager):
 
 
 class Client(AbstractBaseUser, PermissionsMixin):
-    """Custom."""
+    """Client."""
 
     email = models.EmailField(
-        max_length=100, unique=True, verbose_name='почта'
+        max_length=100,
+        unique=True,
+        verbose_name='почта'
     )
     is_active = models.BooleanField(
-        default=True, verbose_name='активность'
+        default=True,
+        verbose_name='активность'
     )
     is_superuser = models.BooleanField(
-        default=False, verbose_name='администратор'
+        default=False,
+        verbose_name='администратор'
     )
     is_staff = models.BooleanField(
-        default=False, verbose_name='менеджер'
+        default=False,
+        verbose_name='менеджер'
     )
     date_joined = models.DateTimeField(
-        default=timezone.now, verbose_name='дата регистрации'
+        default=timezone.now,
+        verbose_name='дата регистрации'
     )
     balance = models.FloatField(
-        default=0.0, verbose_name='баланс'
+        default=0.0,
+        verbose_name='баланс'
     )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

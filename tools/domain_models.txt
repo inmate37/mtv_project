@@ -6,6 +6,9 @@ EventStatuses: tuple = (
 def calculate_coefficient(strength_1: int, strength_2: int) -> int:
     return (1.2, 8.0)
 
+Player (id=1)
+    power: int = 0
+
 Team (id=1)
     name: str = 'France'
     power: int = 10
