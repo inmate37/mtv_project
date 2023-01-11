@@ -1,3 +1,6 @@
+# Future
+from __future__ import annotations
+
 # Python
 from typing import Optional
 
@@ -18,13 +21,21 @@ class PlayerAdmin(admin.ModelAdmin):
 
     model = Player
 
+    search_fields = (
+        'name',
+        'surname'
+    )
     readonly_fields = ()
+    list_filter = (
+        'status',
+    )
     list_display = (
         'name',
         'surname',
         'power',
         'age'
     )
+    ordering = ('-id',)
 
     def get_readonly_fields(
         self,

@@ -64,32 +64,35 @@ class PlayerManager(models.QuerySet):
 
     def get_free_agents(self) -> QuerySet['Player']:
         return self.filter(
-            status=Player.FREE_AGENT
+            status=Player.STATUS_FREE_AGENT
         )
 
     def get_team_members(self) -> QuerySet['Player']:
         return self.filter(
-            status=Player.TEAM_MEMBER
+            status=Player.STATUS_TEAM_MEMBER
         )
 
     def get_young_players(self) -> QuerySet['Player']:
         return self.filter(
-            status=Player.TEAM_MEMBER,
-            age__lt=Player.MIN_AGE_FOR_ADULT_TEAM,
-            power__lte=Player.MIN_POWER_FOR_ADULT_TEAM
+            status=Player.STATUS_TEAM_MEMBER,
+            age__lt=Player.ADULT_TEAM_MIN_AGE,
+            power__lte=Player.ADULT_TEAM_MIN_POWER
         )
 
 
 class Player(models.Model):
     """Player."""
 
-    MIN_AGE_FOR_ADULT_TEAM: int = 21
-    MIN_POWER_FOR_ADULT_TEAM: int = 50
-    FREE_AGENT: int = 0
-    TEAM_MEMBER: int = 1
+    ADULT_TEAM_MIN_AGE: int = 17
+    ADULT_TEAM_MAX_AGE: int = 45
+    ADULT_TEAM_MIN_POWER: int = 50
+    STATUS_FREE_AGENT: int = 0
+    STATUS_TEAM_MEMBER: int = 1
+    STATUS_RETIRED: int = 2
     STATUSES: tuple[tuple[int, str], ...] = (
-        (FREE_AGENT, 'Свободный агент'),
-        (TEAM_MEMBER, 'Состоит в команде')
+        (STATUS_FREE_AGENT, 'Свободный агент'),
+        (STATUS_TEAM_MEMBER, 'Состоит в команде'),
+        (STATUS_RETIRED, 'Завершил карьеру')
     )
 
     name: str = models.CharField(
@@ -108,7 +111,7 @@ class Player(models.Model):
     )
     status: int = models.PositiveSmallIntegerField(
         choices=STATUSES,
-        default=FREE_AGENT,
+        default=STATUS_FREE_AGENT,
         verbose_name='статус'
     )
     team: Team = models.ForeignKey(
@@ -122,14 +125,19 @@ class Player(models.Model):
     objects = PlayerManager()
 
     class Meta:
-        ordering = ('-power',)
+        ordering = ('-id',)
         verbose_name = 'игрок'
         verbose_name_plural = 'игроки'
 
-    def clean(self):
-        if (self.age < 17) or (self.age >= 50):
+    def clean(self) -> None:
+        if (
+            self.age < self.ADULT_TEAM_MIN_AGE
+        ) or (
+            self.age >= self.ADULT_TEAM_MAX_AGE
+        ):
             raise ValidationError('Player age invalid')
-        if self.power < 50:
+
+        if self.power < self.ADULT_TEAM_MIN_POWER:
             raise ValidationError('Player power invalid')
 
     def save(
@@ -140,11 +148,26 @@ class Player(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
-    def delete(self) -> None:
-        self.status = self.FREE_AGENT
-        self.save(
-            update_fields=('status',)
-        )
+    def delete(
+        self,
+        *args: Any,
+        **kwargs: Any
+    ) -> None:
+        self.status = self.STATUS_FREE_AGENT
+        self.save(update_fields=('status',))
+        # super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'{self.name} {self.surname} | {self.power}'
+
+    @property
+    def fullname(self) -> str:
+        return f'{self.name} {self.surname}'
+
+    def free(self) -> None:
+        self.status = self.STATUS_FREE_AGENT
+        self.save(update_fields=('status',))
+
+    def retire(self) -> None:
+        self.status = self.STATUS_RETIRED
+        self.save(update_fields=('status',))
