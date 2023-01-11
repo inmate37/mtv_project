@@ -86,6 +86,16 @@ USE_I18N = True
 USE_TZ = True
 
 # ------------------------------------------------
+# Email-host
+#
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = config('EMAIL_HOST', cast=str)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', cast=str)
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', cast=str)
+EMAIL_PORT = 587
+
+# ------------------------------------------------
 # Debug-toolbar
 #
 INTERNAL_IPS = (

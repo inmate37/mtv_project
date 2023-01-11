@@ -1,7 +1,11 @@
+# Future
+from __future__ import annotations
+
 # Python
 from typing import Any
 
 # Django
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
 
@@ -56,7 +60,7 @@ class Team(models.Model):
         return self.title
 
 
-class PlayerManager(models.Manager):
+class PlayerManager(models.QuerySet):
 
     def get_free_agents(self) -> QuerySet['Player']:
         return self.filter(
@@ -88,26 +92,26 @@ class Player(models.Model):
         (TEAM_MEMBER, 'Состоит в команде')
     )
 
-    name = models.CharField(
+    name: str = models.CharField(
         max_length=25,
         verbose_name='имя'
     )
-    surname = models.CharField(
+    surname: str = models.CharField(
         max_length=25,
         verbose_name='фамилия'
     )
-    power = models.IntegerField(
+    power: int = models.PositiveSmallIntegerField(
         verbose_name='сила'
     )
-    age = models.IntegerField(
+    age: int = models.PositiveSmallIntegerField(
         verbose_name='возраст'
     )
-    status = models.SmallIntegerField(
+    status: int = models.PositiveSmallIntegerField(
         choices=STATUSES,
         default=FREE_AGENT,
         verbose_name='статус'
     )
-    team = models.ForeignKey(
+    team: Team = models.ForeignKey(
         Team,
         on_delete=models.RESTRICT,
         null=True,
@@ -118,17 +122,22 @@ class Player(models.Model):
     objects = PlayerManager()
 
     class Meta:
-        ordering = (
-            '-power',
-        )
+        ordering = ('-power',)
         verbose_name = 'игрок'
         verbose_name_plural = 'игроки'
+
+    def clean(self):
+        if (self.age < 17) or (self.age >= 50):
+            raise ValidationError('Player age invalid')
+        if self.power < 50:
+            raise ValidationError('Player power invalid')
 
     def save(
         self,
         *args: Any,
         **kwargs: Any
     ) -> None:
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def delete(self) -> None:
